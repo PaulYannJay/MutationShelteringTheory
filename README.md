@@ -1,6 +1,7 @@
-This is a collection of scripts used to perform the analyses of the manuscript *Sheltering of deleterious mutations explains the stepwise extension of recombination suppression on sex chromosomes and other supergenes *
+This is a collection of scripts used to perform the analyses of the manuscript *Sheltering of deleterious mutations explains the stepwise extension of recombination suppression on sex chromosomes and other supergenes*.
 
-For the simulation with SLiM, their is two types of analyses.
+For the simulations with SLiM, their is two types of analyses:
+
 # Analyses of the fate of many inversions (Figures 3, S2-3,10-19,22-23,25) 
 For these analyses, we first perform burn-in simulations to create "initial populations", and then introduce in the initial populations many inversions or other recombination modifiers.
 ## Burn In
@@ -49,6 +50,6 @@ such that:
  > ./ParseInvFreqOutput.pl -i N=1000_u=1e-08_r=1e-05_MaxSizeInv=50000000_Rep_6_InvFreq_IndivSimulation_XY.txt -o N=1000_u=1e-08_r=1e-05_MaxSizeInv=50000000_Rep_6_InvFreq_IndivSimulation_XY.Parsed.txt  
 ./ParseRecombinationOutput.pl -i N=1000_u=1e-08_r=1e-05_MaxSizeInv=50000000_Rep_6_Nrecomb_IndivSimulation_XY.txt -o N=1000_u=1e-08_r=1e-05_MaxSizeInv=50000000_Rep_6_Nrecomb_IndivSimulation_XY.Parsed.txt
 
-##Deterministic simulations (Figure 2, S1,4-9) and Figures
+# Deterministic simulations (Figure 2, S1,4-9) and Figures
 Figures and deterministic simulations can be performed with the R script (more details in the script):
  - Sex-ChromPaperPlot_V2_Clean.r
