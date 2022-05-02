@@ -16,7 +16,7 @@ initialize() {
 
 	// uniform recombination along two chromosomes
 	rates=c(r, 0.5, r);//Two chromosomes with R=1e-8	
-    ends=c(9999999,10000000,19999999); //Two chromosome of size 1000000	
+    ends=c(9999999,10000000,19999999); //Two chromosome of size 10000000	
 	initializeRecombinationRate(rates, ends);
 	initializeSex("A");
 }
@@ -82,7 +82,7 @@ initialize() {
     		MutNoInvFreq=mean(sim.mutationFrequencies(NULL, MutNoInv)); //Mean frequency of mutation in the inversion
 			FreqMutNoInvvec=c(FreqMutNoInvvec, MutNoInvFreq); //put in a vector
 			}
-		meanNbMutNoInv=mean(NMutNoInvvec); //mean number of mutation
+		meanNbMutNoInv=mean(NMutNoInvvec); //mean number of mutation in non-inverted segments
 		sdNbMutNoInv=sd(NMutNoInvvec); // sd
 		maxNbMutNoInv=max(NMutNoInvvec); //max
 		minNbMutNoInv=min(NMutNoInvvec); //min
@@ -97,7 +97,7 @@ initialize() {
 		// genome W Inv
 		NMutWInvvec=c();
 		FreqMutWInvvec=c();
-		for (g in genomeWInv) { //For all genome without the inversion
+		for (g in genomeWInv) { //For all genomes with the inversion
 			posMut = g.mutationsOfType(m1).position; //position of mutation in this genome
 			NbMut=sum((posMut >= start) & (posMut < end)); //Number of mutation in the inversion region
 			NMutWInvvec=c(NMutWInvvec, NbMut); //put in a vector
@@ -106,7 +106,7 @@ initialize() {
     		MutWInvFreq=mean(sim.mutationFrequencies(NULL, MutWInv)); //Mean frequency of mutation in the inversion
 			FreqMutWInvvec=c(FreqMutWInvvec, MutWInvFreq); //put in a vector
 			}
-		meanNbMutWInv=mean(NMutWInvvec);
+		meanNbMutWInv=mean(NMutWInvvec); //Mean number of mutations in inversions
 		if (size(NMutWInvvec) > 1)
 		{ sdNbMutWInv=sd(NMutWInvvec);}
 		else
@@ -137,22 +137,21 @@ initialize() {
 	sim.simulationFinished();
 }
 
-recombination() { //Define special recombination pattern depending on mutation (inversion) presence
+recombination() { //Define special recombination pattern depending on mutation (inversion) presence and sex-chromosome genotype
 	Bool=1;
-	//if (genome1.containsMarkerMutation(m2, 500000) == genome2.containsMarkerMutation(m2, 500000)) //if the mutation associated with inversion is found in the two genome
-	if (genome1.containsMarkerMutation(m2, 5000000) != genome2.containsMarkerMutation(m2, 5000000)) //if the mutation associated with inversion is found in the two genome
+	if (genome1.containsMarkerMutation(m2, 5000000) != genome2.containsMarkerMutation(m2, 5000000)) //XY individual
 		{ 
-		inInv = (breakpoints > 0) & (breakpoints < 10000000); //Define breakpoint of inversion
-		if (any(inInv)) //If no recombination breakpoint fall in the inversion breakpoint, 
-			{breakpoints = breakpoints[!inInv]; //If not, this recombination can't occur
+		inInv = (breakpoints > 1000000) & (breakpoints < 9000000); // No recombination between position 1-9Mb (mimicking old sex chrom
+		if (any(inInv)) //If a recombination fall in the non-recombining region, 
+			{breakpoints = breakpoints[!inInv]; //This recombination can't occur
 			Bool=0;
 			}
 		}
 	if (genome1.containsMarkerMutation(m4, pos) != genome2.containsMarkerMutation(m4, pos)) //if the mutation associated with inversion is found in the two genome
 		{ 
 		inInv = (breakpoints > start) & (breakpoints < end); //Define breakpoint of inversion
-		if (any(inInv)) //If no recombination breakpoint fall in the inversion breakpoint, 
-			{breakpoints = breakpoints[!inInv]; //If not, this recombination can't occur
+		if (any(inInv)) //If a recombination breakpoint fall in the inversion breakpoint, 
+			{breakpoints = breakpoints[!inInv]; //This recombination can't occur
 			Bool=0;
 			}
 		}

@@ -45,18 +45,18 @@ initialize() {
 1:15000 late(){
 	if (sim.generation % 100 == 0)
 		{
-		Genomes=p1.genomes; // genome with inversion
+		Genomes=p1.genomes; // All genomes
 		NMutVec=c();
 		NMutVec_AroundMT=c();
 		for (g in Genomes) {
 			NbMut=g.countOfMutationsOfType(m1);
 			NMutVec=c(NMutVec, NbMut);
 			}
-		meanNbMut=mean(NMutVec);
+		meanNbMut=mean(NMutVec); //mean number of mutations in genomes
 		mut1 = sim.mutationsOfType(m1);
-		Nmut1= sim.countOfMutationsOfType(m1);
-		Freq1=sim.mutationFrequencies(NULL, mut1);
-		MeanFreq1=mean(Freq1);
+		Nmut1= sim.countOfMutationsOfType(m1); //Total number of mutations
+		Freq1=sim.mutationFrequencies(NULL, mut1); 
+		MeanFreq1=mean(Freq1); //mean frequency of mutations
 		MutXY=mut1[(mut1.position >= 4975000) & (mut1.position < 5250000)];
 		NbMutXY=size(MutXY);
 		FreqMutXY=mean(sim.mutationFrequencies(NULL, MutXY));
@@ -73,13 +73,11 @@ sim.simulationFinished();
 }
 
 recombination() { //Define special recombination pattern depending on mutation (inversion) presence
-	if (genome1.containsMarkerMutation(m2, 500000) == genome2.containsMarkerMutation(m2, 500000)) //if the mutation associated with inversion is found in the two genome
-	//if (genome1.containsMarkerMutation(m4, 200000) == genome2.containsMarkerMutation(m4, 200000)) //if the mutation associated with inversion is found in the two genome
+	if (genome1.containsMarkerMutation(m2, 500000) == genome2.containsMarkerMutation(m2, 500000)) //if the individuals is XX
 		{return F;} //Nothing happens
-	else
+	else //individuals XY
 		{ 
-		//inInv = (breakpoints > 1) & (breakpoints < 500000); //Define breakpoint of inversion
-		inInv = (breakpoints > 0) & (breakpoints < 10000000); //Define breakpoint of inversion
+		inInv = (breakpoints > 1000000) & (breakpoints < 9000000); // No recombination between position 1-9 Mb (simulate old sex chromosome with small PAR)
 		if (!any(inInv)) //If no recombination breakpoint fall in the inversion breakpoint, 
 			{return F;} // Nothing happens
 		else 

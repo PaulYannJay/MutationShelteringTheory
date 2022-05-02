@@ -18,7 +18,6 @@ initialize() {
     ends=c(9999999,10000000,19999999); //Two chromosome of size 10Mb	
 	initializeRecombinationRate(rates, ends);
 	initializeSex("A");
-	defineConstant("start", clock());
 }
 // create a population of N individuals
 1 late(){
@@ -43,21 +42,21 @@ initialize() {
 }
 
 1:15000 late(){
-	if (sim.generation % 100 == 0)
+	if (sim.generation % 100 == 0) //print output every 100 generation
 		{
-		Genomes=p1.genomes; // genome with inversion
+		Genomes=p1.genomes; // All genomes 
 		NMutVec=c();
 		NMutVec_AroundMT=c();
 		for (g in Genomes) {
 			NbMut=g.countOfMutationsOfType(m1);
 			NMutVec=c(NMutVec, NbMut);
 			}
-		meanNbMut=mean(NMutVec);
-		mut1 = sim.mutationsOfType(m1);
-		Nmut1= sim.countOfMutationsOfType(m1);
-		Freq1=sim.mutationFrequencies(NULL, mut1);
+		meanNbMut=mean(NMutVec); //mean number of mutations in genomes
+		mut1 = sim.mutationsOfType(m1); 
+		Nmut1= sim.countOfMutationsOfType(m1); //Number of mutations segregating
+		Freq1=sim.mutationFrequencies(NULL, mut1); //mean frequency of mutations
 		MeanFreq1=mean(Freq1);
-		MutXY=mut1[(mut1.position >= 4975000) & (mut1.position < 5250000)];
+		MutXY=mut1[(mut1.position >= 4975000) & (mut1.position < 5250000)]; //Mutation close to the sex determining locus (useless, used for checking)
 		NbMutXY=size(MutXY);
 		FreqMutXY=mean(sim.mutationFrequencies(NULL, MutXY));
 		line=paste(c(N,"\t", mu,"\t",r,"\t",h,"\t",s,"\t",sim.generation,"\t", meanNbMut,"\t", Nmut1, "\t", MeanFreq1, "\t", NbMutXY, "\t", FreqMutXY)); //output the frequency of a given mutation
@@ -67,8 +66,6 @@ initialize() {
 
 15000 late() {
 sim.outputFull("../InitialState/slim_g15000_MidSDR_10MChrom_XY_N=" + N + "_r=" + r + "_u=" + mu + "_s=" + s + "_h=" + h + "_" + simID + ".txt");
-line=paste(c(N , r , mu , s , h , sim.generation, "XY", simID, (clock() - start)));
-writeFile("../Output/RunningTime.txt", line, append=T);
 sim.simulationFinished();
 }
 

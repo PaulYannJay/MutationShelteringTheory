@@ -3,7 +3,7 @@ initialize() {
 	// set the overall mutation rate
 	initializeMutationRate(mu);
 	// m1 mutation type: neutral
-	initializeMutationType("m10", 0, "g", s, 0.2); //mutation sampled among a gamma dsitribution
+	initializeMutationType("m10", 0, "g", s, 0.2); //mutation sampled among a gamma distribution and with various h
 	initializeMutationType("m11", 0.01, "g", s, 0.2);
 	initializeMutationType("m12", 0.1, "g", s, 0.2);
 	initializeMutationType("m13", 0.2, "g", s, 0.2);
@@ -25,7 +25,6 @@ initialize() {
     ends=c(9999999,10000000,19999999); //Two chromosome of size 1000000	
 	initializeRecombinationRate(rates, ends);
 	initializeSex("A");
-	defineConstant("start", clock());
 }
 // create a population of 500 individuals
 1 late(){
@@ -52,7 +51,7 @@ initialize() {
 1:15000 late(){
 	if (sim.generation % 100 == 0)
 		{
-		Genomes=p1.genomes; // genome with inversion
+		Genomes=p1.genomes; // All genomes
 		NMutVec=c();
 		NMutVec_AroundMT=c();
 		for (g in Genomes) {
@@ -66,7 +65,7 @@ initialize() {
 			NbMut=NbMut1+NbMut2+NbMut3+NbMut4+NbMut5+NbMut6+NbMut7;
 			NMutVec=c(NMutVec, NbMut);
 			}
-		meanNbMut=mean(NMutVec);
+		meanNbMut=mean(NMutVec); //Mean number of mutations in genomes
 		Mut1=sim.mutationsOfType(m10);
 		Mut2=sim.mutationsOfType(m11);
 		Mut3=sim.mutationsOfType(m12);
@@ -82,9 +81,9 @@ initialize() {
 		NbMut5=sim.countOfMutationsOfType(m14);
 		NbMut6=sim.countOfMutationsOfType(m15);
 		NbMut7=sim.countOfMutationsOfType(m16);
-		Nmut=NbMut1+NbMut2+NbMut3+NbMut4+NbMut5+NbMut6+NbMut7;
+		Nmut=NbMut1+NbMut2+NbMut3+NbMut4+NbMut5+NbMut6+NbMut7; //Total number of mutation
 		Freq1=sim.mutationFrequencies(NULL, mut);
-		MeanFreq1=mean(Freq1);
+		MeanFreq1=mean(Freq1); //Mean frequency of mutatios
 		MutXY=mut[(mut.position >= 4975000) & (mut.position < 5250000)];
 		NbMutXY=size(MutXY);
 		FreqMutXY=mean(sim.mutationFrequencies(NULL, MutXY));
@@ -95,8 +94,6 @@ initialize() {
 
 15000 late() {
 sim.outputFull("../InitialState/slim_g15000_MidSDR_10MChrom_XY_N=" + N + "_r=" + r + "_u=" + mu + "_Lambs=" + s + "_h=variable"+ "_" + simID + ".txt");
-line=paste(c(N , r , mu , s , sim.generation, "XY", simID, (clock() - start)));
-writeFile("../Output/RunningTimeLamb.txt", line, append=T);
 sim.simulationFinished();
 }
 

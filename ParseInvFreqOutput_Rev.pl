@@ -28,6 +28,5 @@ while(<IN>)
 	else
 	{
 		$hash{$.}=$_;
-		#print OUT $gen, "\t", $_;
 	}
 }	

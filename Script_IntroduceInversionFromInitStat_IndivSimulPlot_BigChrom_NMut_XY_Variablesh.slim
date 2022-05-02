@@ -16,12 +16,12 @@ initialize() {
 	// g1 genomic element type: uses m1 for all mutations
 	initializeGenomicElementType("g1", c(m10,m11,m12,m13,m14,m15,m16),c(1,1,1,1,1,1,1)); //mutation with different dominance appear with equal probability
 
-	// uniform chromosome of length 2000 kb for two chromosome
+	// uniform chromosome of length 20000 kb for two chromosomes
 	initializeGenomicElement(g1, 0,19999999);
 
 
 	// uniform recombination along two chromosomes
-	rates=c(r, 0.5, r);//Two chromosomes with R=1e-8	
+	rates=c(r, 0.5, r);//Two chromosomes	
     ends=c(9999999,10000000,19999999); //Two chromosome of size 1000000	
 	initializeRecombinationRate(rates, ends);
 	initializeSex("A");
@@ -33,18 +33,18 @@ initialize() {
 }
 
 15000 late() { //using late() just to avoid drift the first generation
-	sim.readFromPopulationFile(Init);
+	sim.readFromPopulationFile(Init); //Read the initial population file
 	// start a newly seeded run
 	setSeed(rdunif(1, 0, asInteger(2^62) - 1));
    	YChromBool=p1.genomes.containsMarkerMutation(m2,5000000);//vector of boolean depending on whether genome that contain the inversion
-    if ( SexChrom == "Y")
+    if ( SexChrom == "Y")//SexChrom is a script parameter : Y -> introduce inversion on the Y chromosome;  X -> introduce inversion on the X chromosome
     { Chrom=p1.genomes[YChromBool];}//vector of boolean depending on whether genome that contain the inversion
     else
     {Chrom=p1.genomes[!YChromBool];}
 	sample(Chrom, 1).addNewDrawnMutation(m4, pos); //introduce a new inversion
 	}
 
-15000:25000	modifyChild(p1) { //simulating the meeting between two gamete and fecondation depand on their genotype
+15000:25000	modifyChild(p1) { //simulating the meeting between two gamete and fecondation depand on their genotype // XY system
 	numY = sum(child.genomes.containsMarkerMutation(m2, 5000000));
 	// no individual should have more than one Y
 	if (numY > 1)
@@ -63,9 +63,9 @@ initialize() {
 		{
 		file=paste(c("../Output/N=",N,"_Inv=",start, "-", end, "_r=", r, "_u=",mu ,"_Variableh","_Lambs=",s,"_IntroduceInvFromInit_Nmut_Freq_IndivPlot.txt"), sep="");
 		mut4 = sim.mutationsOfType(m4);//inversion marker
-		if (size (mut4) != 1) //No more inversion in the dataset (Fixed or Lost)
+		if (size (mut4) != 1) //No more inversion segregating in the population ( Inversion ixed or Lost)
 		{
-			sim.simulationFinished(); // The simulaten end when their is no more inversion segregating
+			sim.simulationFinished(); // The simulation end when their is no more inversion segregating
 		}
 		else
 		{
@@ -75,7 +75,7 @@ initialize() {
 		//genome no Inv
 		NMutNoInvvec=c(); //vector containg the number of mutation in indiv without inversion
 		FreqMutNoInvvec=c(); //meab frequency of these mutation
-		for (g in genomeNoInv) { //For all genome without the inversion
+		for (g in genomeNoInv) { //For all genomes without the inversion
 			Mut1=g.mutationsOfType(m10);
 			Mut2=g.mutationsOfType(m11);
 			Mut3=g.mutationsOfType(m12);
@@ -92,7 +92,7 @@ initialize() {
     		MutNoInvFreq=mean(sim.mutationFrequencies(NULL, MutNoInv)); //Mean frequency of mutation in the inversion
 			FreqMutNoInvvec=c(FreqMutNoInvvec, MutNoInvFreq); //put in a vector
 			}
-		meanNbMutNoInv=mean(NMutNoInvvec); //mean number of mutation
+		meanNbMutNoInv=mean(NMutNoInvvec); //mean number of mutation in non-inverted segment
 		sdNbMutNoInv=sd(NMutNoInvvec); // sd
 		maxNbMutNoInv=max(NMutNoInvvec); //max
 		minNbMutNoInv=min(NMutNoInvvec); //min
@@ -107,7 +107,7 @@ initialize() {
 		// genome W Inv
 		NMutWInvvec=c();
 		FreqMutWInvvec=c();
-		for (g in genomeWInv) { //For all genome without the inversion
+		for (g in genomeWInv) { //For all genomes with the inversion
 			Mut1=g.mutationsOfType(m10);
 			Mut2=g.mutationsOfType(m11);
 			Mut3=g.mutationsOfType(m12);
@@ -124,7 +124,7 @@ initialize() {
     		MutWInvFreq=mean(sim.mutationFrequencies(NULL, MutWInv)); //Mean frequency of mutation in the inversion
 			FreqMutWInvvec=c(FreqMutWInvvec, MutWInvFreq); //put in a vector
 			}
-		meanNbMutWInv=mean(NMutWInvvec);
+		meanNbMutWInv=mean(NMutWInvvec); //Mean number of mutation in inversions
 		if (size(NMutWInvvec) > 1)
 		{ sdNbMutWInv=sd(NMutWInvvec);}
 		else
@@ -142,7 +142,7 @@ initialize() {
     	meanFitnessInv=mean(p1.cachedFitness(genomeWInv.individual.index)); //Mean Fitness of sample with inversion
     	meanFitnessNoInv=mean(p1.cachedFitness(genomeNoInv.individual.index));//Mean Fitness of sample without inversion
 		Freq4=sim.mutationFrequencies(NULL, mut4);
-		line=paste(c(N,"\t", mu,"\t",r,"\t",s,"\t",sim.generation,"\t",start,"\t",end,"\t",rep,"\t",meanNbMutWInv, "\t",minNbMutWInv, "\t",maxNbMutWInv, "\t",sdNbMutWInv, "\t",meanFreqMutWInv,"\t",meanNbMutNoInv, "\t",minNbMutNoInv, "\t",maxNbMutNoInv, "\t",sdNbMutNoInv, "\t",meanFreqMutNoInv,"\t",meanFitnessInv, "\t", meanFitnessNoInv,"\t", Freq4, "\t", SexChrom)); //output the frequency of a given mutation
+		line=paste(c(N,"\t", mu,"\t",r,"\t",s,"\t",sim.generation,"\t",start,"\t",end,"\t",rep,"\t",meanNbMutWInv, "\t",minNbMutWInv, "\t",maxNbMutWInv, "\t",sdNbMutWInv, "\t",meanFreqMutWInv,"\t",meanNbMutNoInv, "\t",minNbMutNoInv, "\t",maxNbMutNoInv, "\t",sdNbMutNoInv, "\t",meanFreqMutNoInv,"\t",meanFitnessInv, "\t", meanFitnessNoInv,"\t", Freq4, "\t", SexChrom)); //output
 		writeFile(file, line, append=T);
 		}
 	}
@@ -153,12 +153,10 @@ initialize() {
 }
 
 recombination() { //Define special recombination pattern depending on mutation (inversion) presence
-	if (genome1.containsMarkerMutation(m4, pos) == genome2.containsMarkerMutation(m4, pos)) //if the mutation associated with inversion is found in the two genome
-	//if (genome1.containsMarkerMutation(m4, 200000) == genome2.containsMarkerMutation(m4, 200000)) //if the mutation associated with inversion is found in the two genome
+	if (genome1.containsMarkerMutation(m4, pos) == genome2.containsMarkerMutation(m4, pos)) //if the inversion marker is found in the two genome
 		{return F;} //Nothing happens
 	else
 		{ 
-		//inInv = (breakpoints > 1) & (breakpoints < 500000); //Define breakpoint of inversion
 		inInv = (breakpoints > start) & (breakpoints < end); //Define breakpoint of inversion
 		if (!any(inInv)) //If no recombination breakpoint fall in the inversion breakpoint, 
 			{return F;} // Nothing happens

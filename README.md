@@ -1,5 +1,7 @@
 This is a collection of scripts used to perform the analyses of the manuscript *Sheltering of deleterious mutations explains the stepwise extension of recombination suppression on sex chromosomes and other supergenes*.
 
+For any question regarding the analyses or the script usage, please contact me: *paul.yann.jay[at]gmail.com*
+
 For the simulations with SLiM, their is two types of analyses:
 
 # Analyses of the fate of many inversions (Figures 3, S2-3,10-19,22-23,25) 
@@ -14,7 +16,8 @@ These Initial populations can be created with the scripts:
 
 Basic usage of the "DefineInitialState" script:
 >slim -d N=1000 -d s=-0.01 -d h=0.1 -d r=1e-08 -d mu=1.45e-8 ScriptNeutralInversion_DefineInitialState_XY.slim #Perform a single simulation  
-parallel -j10 slim -d N=1000 -d mu=1e-8 -d h={1} -d s={2} -d r=1e-6 ScriptNeutralInversion_DefineInitialState_XY.slim ::: 0 0.001 0.005 0.01 0.05 0.1 0.5 ::: -0.001 -0.005 -0.01 -0.05 -0.1 -0.6 #Perform multiple simulation in parallel with different s and h
+parallel -j10 slim -d N=1000 -d mu=1e-8 -d h={1} -d s={2} -d r=1e-6 ScriptNeutralInversion_DefineInitialState_XY.slim ::: 0 0.001 0.005 0.01 0.05 0.1 0.5 ::: -0.001 -0.005 -0.01 -0.05 -0.1 -0.6 #Perform multiple simulation in parallel on 10 cores with different *s* and *h*  
+*mu* define the mutation rate, *r* the recombination rate, *s* the selection coefficient (fixed or the mean of the gamma distribution), *h* the dominance coefficient, *N* the population size
 
 This writes the initial populations in a ../InitialState directory (must be created !)
 
@@ -28,6 +31,7 @@ Then, we introduce in these initial population 1000's of inversions or other rec
 
 Basic usage of the "_IntroduceInversionFromInitStat" scripts :
  > slim -d N=1000 -d mu=1e-08 -d h=0.01 -d s=-0.01 -d r=1e-5 -d rep=1 -d start=1 -d end=2000000 -d "Init='../InitialState/slim_g15000_N=1000_r=1e-05_u=1e-08_s=-0.01_h=0.01_1635828730194.txt'" -d "SexChrom='Y'" Script_IntroduceInversionFromInitStat_IndivSimulPlot_BigChrom_NMut_XY.slim #Introduction of a 2000000 bp inversion on the Y chromosome in a initial population. Rep is only used to annotate the simulation (simunation Number "Rep").  
+The position of the inversion is defined with *start* and *end*. To mimick chromosome fusion, just consider start and end spanning the gap between the two chromosome, *i.e.* the position 10Mb (*e.g. start=7000000, end=11000000)
 
 To introduce 1000's of inversion in population with different parameter, use (and adapt) the script ParalleleWhileLoop_IndivSimulPlot_NMut_XY.sh:
  > source ParalleleWhileLoop_IndivSimulPlot_NMut_XY.sh  
