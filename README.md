@@ -49,5 +49,6 @@ such that:
  > ./ParseInvFreqOutput.pl -i N=1000_u=1e-08_r=1e-05_MaxSizeInv=50000000_Rep_6_InvFreq_IndivSimulation_XY.txt -o N=1000_u=1e-08_r=1e-05_MaxSizeInv=50000000_Rep_6_InvFreq_IndivSimulation_XY.Parsed.txt  
 ./ParseRecombinationOutput.pl -i N=1000_u=1e-08_r=1e-05_MaxSizeInv=50000000_Rep_6_Nrecomb_IndivSimulation_XY.txt -o N=1000_u=1e-08_r=1e-05_MaxSizeInv=50000000_Rep_6_Nrecomb_IndivSimulation_XY.Parsed.txt
 
-Figure and deterministic simulation can be perform with the R script (more details in the script):
+##Deterministic simulations (Figure 2, S1,4-9) and Figures
+Figures and deterministic simulations can be performed with the R script (more details in the script):
  - Sex-ChromPaperPlot_V2_Clean.r
