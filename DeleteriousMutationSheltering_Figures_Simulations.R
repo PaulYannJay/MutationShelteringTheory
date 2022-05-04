@@ -1018,7 +1018,7 @@ save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS10.png", Plot2Mb, ncol=3, nrow=9)
 save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS10.pdf", Plot2Mb, ncol=3, nrow=9)
 
 ### Figure S13 ###
-SimulSub=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/InversionTrajectories_N=1000_Code.txt",  header=T, stringsAsFactors = F)
+SimulSub=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/InversionTrajectories_N=1000_CodeB.txt",  header=T, stringsAsFactors = F)
 SimulSubEx=subset(SimulSub, (SimulSub$h==0.1 & SimulSub$s==-0.01 & SimulSub$InvSize==2000000)) #Value to focus on
 summarySub=SimulSubEx %>% group_by(Code) %>% summarise(maxFreq=max(Freq), maxGen=max(Gen), InitMutNumb=min(MeanMutInv))
 LostSimulSub=summarySub[summarySub$maxGen<24991,]$Code # Inversion that have been lost or fixed
@@ -1596,6 +1596,7 @@ save_plot(paste0("~/Paper/ModelSexChrom/V3/Plot/FigS1.pdf"),PlotProbaStat, nrow=
 
 ### Fig S2-3 ###
 Data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/Linked_2MbInv_Gen1000.txt", stringsAsFactors = F) #FigS3
+# Data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/Unlinked_2MbInv_Gen1000.txt", stringsAsFactors = F) #FigS2
 colnames(Data)=c("N", "u", "r", "h", "s", "Gen", "DebInv", "FinInv", "Rep", "MutInv", "FreqMutInv", "InvFit", "MutNoInv","FreqMutNoInv","NoInvFit","Freq")
 Data=Data[Data$MutInv != -1, ]
 Data$Code=paste(Data$u,Data$r,Data$h,Data$s,Data$DebInv,Data$FinInv, Data$Rep, sep="_")
@@ -1655,7 +1656,7 @@ save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS3.pdf", Plot, ncol=3,nrow=3, base_a
 # save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS2.pdf", Plot, ncol=3,nrow=3, base_aspect_ratio = 1)
 
 ### Fig S18 ###
-Simul=read.table(paste("~/Analysis/DelSheltering/V3/Output//N=1000_Inv=9999999-11999999_r=1e-06_u=5e-09_h=All_s=-0.01IntroduceInvFromInit_Nmut_Freq_IndivPlot_ChromFus.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
+Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/N=1000_2MbChromosomeFusion_Trajectory.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
 colnames(Simul)=c("N", "u", "r", "h", "s", "Gen", "DebInv", "FinInv", "Rep", 
                   "MeanMutInv","MinMutInv","MaxMutInv","sdMutInv","FreqMutInv",
                   "MeanMutNoInv","MinMutNoInv","MaxMutNoInv","sdMutNoInv","FreqMutNoInv",
