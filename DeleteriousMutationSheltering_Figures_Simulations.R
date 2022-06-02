@@ -28,7 +28,7 @@ ThemeSobr=  theme(
 )
 
 ### Figure 3C ###
-Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/InversionTrajectories_N=1000.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
+Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/InversionTrajectories_N=1000_Fig3-S13-S15-S19.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
 colnames(Simul)=c("N", "u", "r", "h", "s", "Gen", "DebInv", "FinInv", "Rep", 
                   "MeanMutInv","MinMutInv","MaxMutInv","sdMutInv","FreqMutInv",
                   "MeanMutNoInv","MinMutNoInv","MaxMutNoInv","sdMutNoInv","FreqMutNoInv",
@@ -196,7 +196,7 @@ save_plot(paste0("~/Paper/ModelSexChrom/V3/Plot/Fig3.png"),MergedPlot, nrow=3, n
 save_plot(paste0("~/Paper/ModelSexChrom/V3/Plot/Fig3.pdf"),MergedPlot, nrow=3, ncol=2, base_aspect_ratio = 1) #Fig. S?
 
 ### Figure S16 # Same as before but for N=10000 ###
-Simul10k=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/InversionTrajectories_N=10000.txt",sep=""), stringsAsFactors = F)
+Simul10k=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/InversionTrajectories_N=10000_FigS11-S12-S16.txt",sep=""), stringsAsFactors = F)
 colnames(Simul10k)=c("N", "u", "r", "h", "s", "Gen", "DebInv", "FinInv", "Rep", 
                   "MeanMutInv","MinMutInv","MaxMutInv","sdMutInv","FreqMutInv",
                   "MeanMutNoInv","MinMutNoInv","MaxMutNoInv","sdMutNoInv","FreqMutNoInv",
@@ -471,6 +471,7 @@ InversionFrequency=base+  geom_tile(aes(x=h, y=s, fill=ProbEquil))+
                                 label.vjust =1
   ))
 InversionFrequency
+
 # Figure 2 b #
 LessLoadProb=base+geom_tile(aes(x=h, y=s, fill=TotProb))+
   geom_step(data=nqLimitLong, aes(x=h, y=Values, color=n), direction='mid', alpha=0.5)+
@@ -746,17 +747,17 @@ plots <- align_plots(PlotFreq, PlotRecomb, align = 'vh', axis = 'lrtb')
 
 MergedPlot=plot_grid(plots[[1]],plots[[2]],  ncol=1, labels = c('a', 'b'))
 Sub=sub(".*//", "",sub("_InvFreq.*", "", Freq))
-save_plot(paste("~/Paper/ModelSexChrom/V3/Plot/Fig4.png"), MergedPlot, ncol = 2, nrow=2)
-save_plot(paste("~/Paper/ModelSexChrom/V3/Plot/Fig4.pdf"), MergedPlot, ncol = 2, nrow=2)
-# save_plot(paste("~/Paper/ModelSexChrom/V3/Plot/FigS24.png"), MergedPlot, ncol = 2, nrow=2)
-# save_plot(paste("~/Paper/ModelSexChrom/V3/Plot/FigS24.pdf"), MergedPlot, ncol = 2, nrow=2)
+ save_plot(paste("~/Paper/ModelSexChrom/V3/Plot/Fig4.png"), MergedPlot, ncol = 2, nrow=2)
+ save_plot(paste("~/Paper/ModelSexChrom/V3/Plot/Fig4.pdf"), MergedPlot, ncol = 2, nrow=2)
+ #save_plot(paste("~/Paper/ModelSexChrom/V3/Plot/FigS24.png"), MergedPlot, ncol = 2, nrow=2)
+ #save_plot(paste("~/Paper/ModelSexChrom/V3/Plot/FigS24.pdf"), MergedPlot, ncol = 2, nrow=2)
 
 ### Figure 5 ###
 # To get the fraction of the sex chromosome not recombining,
 # in the directory containing the result of all simulations, do (in a bash terminal):
 # for i in *NRecomb_IndivSimulation_OnlyXY_Optim.txt ; do base=${i%%.txt} ; ../../Util/ParseRecombinationOutput_SepSex.pl -i $i -o $base.parsed.txt ; done
 # for i in *_NRecomb_IndivSimulation_OnlyXY_Optim.parsed.txt ; do N_BP=`echo $i | sed 's/.*-BP=//' | sed 's/_.*//'`; echo $N_BP ;  REP=`echo $i | sed 's/.*_Rep_//' | sed 's/_.*//'`; echo $REP; echo -ne "$N_BP\t$REP\t" >> LastGenRecomb.txt ; tail -n 1 $i >> LastGenRecomb.txt ; done
-Data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/LastGenRecomb.txt", stringsAsFactors = F, header=F)
+Data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/LastGenRecomb_Fig5.txt", stringsAsFactors = F, header=F)
 Pos=seq(1:(length(colnames(Data))-3))
 colnames(Data)=c("N_BP","Rep","Generation", Pos) # Set the position along the genome in Mb
 Data$NumberNonRecomb=0 #Number of Mb with no recombination
@@ -785,7 +786,7 @@ PlotNRecomb=baseNRecomb + geom_boxplot(aes(x=as.factor(N_BP), y=FracNonRecom, fi
 # To get a summary of the inversion and reversion that have appeared, 
 # in the directory containing the result of all simulations, do (in a bash terminal):
 # for i in *_NewInv_Optim.txt ; do base=${i%%_NewInv_Optim.txt}; NInv=` cat $i | wc -l`; RevFile=$base"_Reversion_IndivSimulation_OnlyXY_NbMut_Optim.txt"; if [ -f "$RevFile" ]; then NRev=`cat $RevFile | wc -l` ; else NRev=0; fi; BlockRevFile=$base"_BlockedReversion_IndivSimulation_OnlyXY_NbMut_Optim.txt"; if [ -f "$BlockRevFile" ]; then NBlockRev=`cat $BlockRevFile | wc -l` ; else NBlockRev=0; fi;  N_BP=`echo $i | sed 's/.*-BP=//' | sed 's/_.*//'`; echo $N_BP ;  REP=`echo $i | sed 's/.*_Rep_//' | sed 's/_.*//'`; echo -ne "$N_BP\t$REP\t$NRev\t$NInv\t$NBlockRev\n" >> Nreversion_N=1000.txt ; done
-DataRev=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/Nreversion_N=1000.txt", stringsAsFactors = F, header=F)
+DataRev=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/Nreversion_N=1000_Fig5.txt", stringsAsFactors = F, header=F)
 colnames(DataRev)=c("N_BP","Rep","N_Revers", "N_Inv", "NBlockRev")
 baseNRev=ggplot(DataRev)
 PlotNRev=baseNRev + geom_boxplot(aes(x=as.factor(N_BP), y=N_Revers, fill=as.factor(N_BP)), outlier.shape=NA) +
@@ -913,7 +914,7 @@ save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS9.png", InversionFrequency)
 save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS9.pdf", InversionFrequency)
 
 ### Figure S10 ###
-Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/X_Y_Autosomal_Inversion_Trajectories_N=1000.txt",sep=""), stringsAsFactors = F)#Simulation runned with inversion on the X or Y chromosome, or on the autosome. We recorded simulation state every 10 generations.
+Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/X_Y_Autosomal_Inversion_Trajectories_N=1000_FigS10.txt",sep=""), stringsAsFactors = F)#Simulation runned with inversion on the X or Y chromosome, or on the autosome. We recorded simulation state every 10 generations.
 colnames(Simul)=c("N", "u", "r", "h", "s", "Gen", "DebInv", "FinInv","Chrom", "Rep", "MutInv", "FreqMutInv", "InvFit", "MutNoInv","FreqMutNoInv","NoInvFit","Freq")
 Simul=Simul[!(Simul$DebInv>10000000 & Simul$Chrom=="Y"),] # 20,000 inversion are runned in autosome (10,000 in Y-bearing genome, 10,000 in X-bearing genomes). Removing here all the simulations that were perform with autosomal inversion on the Y-bearing slim genome. (Same result are obtain by removed autosomal inverison on X-bearing genome)
 Simul[Simul$DebInv>10000000,]$Chrom="Autosome" #Label the autosomal inversions
@@ -1148,7 +1149,7 @@ save_plot(paste0("~/Paper/ModelSexChrom/V3/Plot/FigS13.png"),MergedPlot2, nrow=4
 save_plot(paste0("~/Paper/ModelSexChrom/V3/Plot/FigS13.pdf"),MergedPlot2, nrow=4, ncol=2)
 
 ### Figure S17 ### Same as Figure S15 but considering that mutation have their selection coefficient drawn from a distribution
-SimulLamb=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/MutationLambdaDistribution_InversionTrajectories.txt",sep=""), stringsAsFactors = F)
+SimulLamb=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/MutationLambdaDistribution_InversionTrajectories_FigS17.txt",sep=""), stringsAsFactors = F)
 colnames(SimulLamb)=c("N", "u", "r", "s", "Gen", "DebInv", "FinInv", "Rep", 
                       "MeanMutInv","MinMutInv","MaxMutInv","sdMutInv","FreqMutInv",
                       "MeanMutNoInv","MinMutNoInv","MaxMutNoInv","sdMutNoInv","FreqMutNoInv",
@@ -1197,7 +1198,7 @@ save_plot(paste0("~/Paper/ModelSexChrom/V3/Plot/FigS17.pdf"),PlotPropInvSpread_A
 
 ### Figure S14 ###
 Col=scales::viridis_pal(begin=0, end=0.6, option="A")(2)
-Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/RecombinationSuppressorEvolution_n=2Mb.txt",sep=""), stringsAsFactors = F) #Evolution of recombination suppressors (suppress recombination in heterozygote and in homozygote, unlike inversions)
+Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/RecombinationSuppressorEvolution_n=2Mb_FigS14.txt",sep=""), stringsAsFactors = F) #Evolution of recombination suppressors (suppress recombination in heterozygote and in homozygote, unlike inversions)
 colnames(Simul)=c("N", "u", "r", "h", "s", "Gen", "DebInv", "FinInv", "Rep", "MutInv", "FreqMutInv", "InvFit", "MutNoInv","FreqMutNoInv","NoInvFit","Freq")
 Simul=subset(Simul, Simul$Gen %% 10 == 0) #Keep only every 10 generation for computing purpose
 Simul$InvSize=Simul$FinInv - Simul$DebInv #Size of the region affected (n)
@@ -1291,7 +1292,7 @@ save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS14.png", Plot2Mb, ncol=4, nrow=6)
 save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS14.pdf", Plot2Mb, ncol=4, nrow=6)
 
 ### Figure S25 ###  
-data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/BurnIn_Stat.txt", stringsAsFactors = F) #Stat computed during the burn in of each simulations
+data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/BurnIn_Stat_FigS25.txt", stringsAsFactors = F) #Stat computed during the burn in of each simulations
 colnames(data)=c("N", "mu","r","h","s","generation", "meanNbMut", "Nmut1", "MeanFreq1", "NbMutXY", "FreqMutXY")
 Col=scales::viridis_pal(begin=0.0, end=0.8, option="A")(7)#Color Palette 
 options(scipen=0) #Non-scientific notation
@@ -1473,7 +1474,7 @@ save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS21.pdf", InversionFrac, nrow=4, nco
 save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS21.png", InversionFrac, nrow=4, ncol = 2)
 
 ### Figure S22 ###
-Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/HaploDiplo_InvTrajectories.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
+Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/HaploDiplo_InvTrajectories_FigS22.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
 
 colnames(Simul)=c("N", "u", "r", "h", "s", "Gen", "DebInv", "FinInv", "FreqHaplo", "Rep", 
                   "MeanMutInv","MinMutInv","MaxMutInv","sdMutInv","FreqMutInv",
@@ -1520,7 +1521,7 @@ save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS22.png", PlotPropInvSpread, ncol=2,
 save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS22.pdf", PlotPropInvSpread, ncol=2, base_aspect_ratio = 1)
 
 ### Figure S23 ###
-data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/HaploDiplo_InitStat.txt", stringsAsFactors = F)
+data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/HaploDiplo_InitStat_FigS23.txt", stringsAsFactors = F)
 colnames(data)=c("N", "mu","r","h","s","FreqHaplo", "generation", "meanNbMut", "Nmut1", "MeanFreq1")
 Col=scales::viridis_pal(begin=0.0, end=0.8, option="A")(4)
 options(scipen=0)
@@ -1595,8 +1596,8 @@ save_plot(paste0("~/Paper/ModelSexChrom/V3/Plot/FigS1.png"),PlotProbaStat, nrow=
 save_plot(paste0("~/Paper/ModelSexChrom/V3/Plot/FigS1.pdf"),PlotProbaStat, nrow=1, ncol=1, base_aspect_ratio = 3) #Fig. S?
 
 ### Fig S2-3 ###
-Data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/Linked_2MbInv_Gen1000.txt", stringsAsFactors = F) #FigS3
-# Data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/Unlinked_2MbInv_Gen1000.txt", stringsAsFactors = F) #FigS2
+Data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/Linked_2MbInv_Gen1000_FigS2.txt", stringsAsFactors = F) #FigS3
+# Data=read.table("~/Paper/ModelSexChrom/V3/CleanDataset/Unlinked_2MbInv_Gen1000_FigS3.txt", stringsAsFactors = F) #FigS2
 colnames(Data)=c("N", "u", "r", "h", "s", "Gen", "DebInv", "FinInv", "Rep", "MutInv", "FreqMutInv", "InvFit", "MutNoInv","FreqMutNoInv","NoInvFit","Freq")
 Data=Data[Data$MutInv != -1, ]
 Data$Code=paste(Data$u,Data$r,Data$h,Data$s,Data$DebInv,Data$FinInv, Data$Rep, sep="_")
@@ -1650,13 +1651,13 @@ Plot=DataAllEnd %>%
          )
   ) %>% plot_grid(plotlist = ., align = 'hv', ncol = 1)
 
-save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS3.png", Plot, ncol=3,nrow=3, base_aspect_ratio = 1)
-save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS3.pdf", Plot, ncol=3,nrow=3, base_aspect_ratio = 1)
-# save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS2.png", Plot, ncol=3,nrow=3, base_aspect_ratio = 1)
-# save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS2.pdf", Plot, ncol=3,nrow=3, base_aspect_ratio = 1)
+#save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS3.png", Plot, ncol=3,nrow=3, base_aspect_ratio = 1)
+#save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS3.pdf", Plot, ncol=3,nrow=3, base_aspect_ratio = 1)
+ save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS2.png", Plot, ncol=3,nrow=3, base_aspect_ratio = 1)
+ save_plot("~/Paper/ModelSexChrom/V3/Plot/FigS2.pdf", Plot, ncol=3,nrow=3, base_aspect_ratio = 1)
 
 ### Fig S18 ###
-Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/N=1000_2MbChromosomeFusion_Trajectory.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
+Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/N=1000_2MbChromosomeFusion_Trajectory_FigS18.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
 colnames(Simul)=c("N", "u", "r", "h", "s", "Gen", "DebInv", "FinInv", "Rep", 
                   "MeanMutInv","MinMutInv","MaxMutInv","sdMutInv","FreqMutInv",
                   "MeanMutNoInv","MinMutNoInv","MaxMutNoInv","sdMutNoInv","FreqMutNoInv",
@@ -1700,7 +1701,7 @@ save_plot(paste0("~/Paper/ModelSexChrom/V3/Plot/FigS18.pdf"),PlotA, nrow=3, ncol
 save_plot(paste0("~/Paper/ModelSexChrom/V3/Plot/FigS18.png"),PlotA, nrow=3, ncol=2) #Fig. S18
 
 ### Figure S19 ###
-Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/InversionTrajectories_N=1000.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
+Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/InversionTrajectories_N=1000_Fig3-S13-S15-S19.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
 colnames(Simul)=c("N", "u", "r", "h", "s", "Gen", "DebInv", "FinInv", "Rep", 
                   "MeanMutInv","MinMutInv","MaxMutInv","sdMutInv","FreqMutInv",
                   "MeanMutNoInv","MinMutNoInv","MaxMutNoInv","sdMutNoInv","FreqMutNoInv",

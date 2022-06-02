@@ -59,4 +59,4 @@ such that:
 
 # Deterministic simulations (Figure 2, S1,4-9) and Figures
 Figures and deterministic simulations can be performed with the R script (more details in the script):
- - Sex-ChromPaperPlot_V2_Clean.r
+ - DeleteriousMutationSheltering_Figures_Simulations.R
