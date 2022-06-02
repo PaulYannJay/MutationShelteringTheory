@@ -60,3 +60,5 @@ such that:
 # Deterministic simulations (Figure 2, S1,4-9) and Figures
 Figures and deterministic simulations can be performed with the R script (more details in the script):
  - DeleteriousMutationSheltering_Figures_Simulations.R
+
+All the dataset are available on figshare (doi:10.6084/m9.figshare.19961033)
