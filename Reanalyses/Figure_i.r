@@ -59,3 +59,9 @@ for (u in unique(SimulSumSum$u)) #For each value of u (1e-08 or 1e-09), create a
     save_plot(paste0("~/Projects/MutationShelteringV2/Output/OldDataJayEtAl2022/Reanalyses_Jay_etAl2022/Figure_i_u",u,".pdf"), PlotFracFixed, nrow=4, ncol=2, base_aspect_ratio = 2)
     save_plot(paste0("~/Projects/MutationShelteringV2/Output/OldDataJayEtAl2022/Reanalyses_Jay_etAl2022/Figure_i_u",u,".png"), PlotFracFixed, nrow=4, ncol=2, base_aspect_ratio = 2)
 }
+
+SimulSumSumWide_FracFixed=SimulSumSum %>%
+    pivot_wider(id_cols=-c(nFixed, n, StartInv), values_from = FracFixed, names_from = Chromosome) %>%
+    mutate(RatioYvsAuto=Y/Autosome) #Reshape the dataframe to compare the rate of fixation on sex chromosomes and autosomes. The column "Y" contains de rate of inversion fixation on Y chromosomes, while "Autosome" contains de rate of inversion fixation on autosomes. The Column "RatioYvsAuto" contains the ratio of these value (>1 if the rate is higher on sex chromosomes, <1 otherwise)
+sum(SimulSumSumWide_FracFixed$RatioYvsAuto>1)/nrow(SimulSumSumWide_FracFixed) #Inversion are more likely to fix on Y chromosomes than on Autosomes in 94.9 % of the parameter space.
+sum(SimulSumSumWide_FracFixed$Y)/sum(SimulSumSumWide_FracFixed$Autosome) #Inversion were 5.81 more likely to fix on Y chromosomes than on Autosomes in the parameter space studied.
