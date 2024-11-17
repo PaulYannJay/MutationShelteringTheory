@@ -1,3 +1,6 @@
+Collection of script to perform the new simulations and analyses found in the 2014 bioRxiv paper: Deleterious mutations can contribute to the evolution of recombination suppression between sex chromosomes
+
+
 #Usage:
 
 Create the necessary directories:
