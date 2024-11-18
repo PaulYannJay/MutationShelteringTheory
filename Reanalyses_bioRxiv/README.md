@@ -17,7 +17,7 @@ Make a simulation of a population with only an autosome or a sex chromosome duri
 
 >export -f slimFc
 
->parallel -j 30 slimFc ::: 12500 ::: -0.001 ::: 2500000 ::: 2000000 ::: 0 ::: {1..100000} #Here, introduce 100000 independant inversions of 2000000bp, centred on position 2500000 (middle of the chromosome), with the same parameter as above. These inversions have no ("0") initial selective advantage, except the one provided by the putative lower load
+>parallel -j 30 slimFc ::: 12500 ::: -0.001 ::: 2500000 ::: 2000000 ::: 0 ::: {1..100000} #Here, introduce 100000 independant inversions of 2000000bp, centred on position 2500000 (middle of the chromosome), with the same parameter values as above. These inversions have no ("0") initial selective advantage, except the one provided by the putative lower load
 
 
 The output file is: IntroInv_g200000_XYsyst_5M_Sex_N12500_r1e-8_u1e-08_s-0.001_sInv0_hmean0.2_Stat.txt

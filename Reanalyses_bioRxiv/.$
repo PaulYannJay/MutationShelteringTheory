@@ -1,0 +1,286 @@
+#Analyses of new dataset (Figure 2)
+library(cowplot)
+library(ggplot2)
+library(tidyverse)
+library(viridis)
+Col2=scales::viridis_pal(begin=0.3, end=0.8, option="C")(2)
+Col3=scales::viridis_pal(begin=0.2, end=0.8, option="C")(3)
+Col5=scales::viridis_pal(begin=0.1, end=0.8, option="A")(5)
+themeSimple=    theme(
+    panel.grid.major.y = element_line(colour = "grey", size=0.1),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
+    text=element_text(size=16),
+    axis.line = element_line(colour = "grey"),
+    axis.title = element_text(face="bold"))
+options(scipen=999)
+
+
+df=read.table("~/Projects/MutationShelteringV2/Output/IntroInv_All_Summarise.txt", stringsAsFactors = F, header = T, sep=",")
+df$PropFix=df$Fixed/(df$NotFixed+df$Fixed) # Fixation rate
+df$Status=paste0(df$Chrom, "\n(N=",df$N,")") 
+
+## Creating new column for plotting labels"
+df$sInvClean="Initially neutral inversions"
+df[df$sInv==0.01,]$sInvClean="Initially beneficial inversions\n(sInv=0.01)"
+df[df$sInv==0.05,]$sInvClean="Initially beneficial inversions\n(sInv=0.05)"
+df$SizeLegend="2 Mb"
+df[df$Size==5000000,]$SizeLegend="5 Mb"
+
+# Changing factor order
+df$sInvClean=factor(df$sInvClean, levels =  c("Initially neutral inversions","Initially beneficial inversions\n(sInv=0.01)","Initially beneficial inversions\n(sInv=0.05)"))
+
+base=ggplot(df[(df$sInv %in% c(0.0,0.01)),],aes(x=as.factor(h), group=as.factor(s), fill=as.factor(s), y=PropFix, shape=as.factor(SizeLegend)))
+PlotProbFix2=base+geom_point(size=8, position=position_dodge(width = 0.50), color="grey10") + 
+    facet_grid(sInvClean ~ Status, scale="free")+
+    scale_shape_manual("Inversion size", values = c(21,24))+
+    scale_fill_manual("Selection coefficient\nof mutations (s)", values=Col5[4:5])+
+    # scale_color_manual("Selection coefficient\nof mutations (s)", values=c("grey10", "grey10"), guide=F)+
+    expand_limits(y = 0)+
+    ylab("Fraction of inversions fixed after 10,000 generations")+
+    themeSimple+theme(#legend.position = "none",
+        panel.spacing = unit(1.5, "lines"),
+        legend.title = element_text(face="bold"),
+        strip.text = element_text(face="bold"),
+        strip.background.x = element_rect(fill="white", colour="black"))
+PlotProbFix2
+ 
+save_plot(paste0("~/Paper/ModelSexChrom_V2/Plots/ProbFix_SameNe.svg"), PlotProbFix2, nrow=2, ncol=2)    
+
+dfSub=df[df$sInv<0.05,]
+dfSum=dfSub %>% group_by(Status, sInv) %>% summarise( n=sum(n), Fixed=sum(Fixed), NotFixed=sum(NotFixed)) # To compare fixation probility
+
+############################ 
+
+
+#### Reanalyses of the dataset from Jay et al. 2022 ### 
+### The data can be downloaded here : https://doi.org/10.6084/m9.figshare.19961033
+Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/Compressed/InversionTrajectories_N=1000_Fig3-S13-S15-S19.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
+
+#Set the column names
+colnames(Simul)=c("N", "u", "r", "h", "s", "Gen", "StartInv", "EndInv", "Rep", 
+                  "MeanMutInv","MinMutInv","MaxMutInv","sdMutInv","FreqMutInv",
+                  "MeanMutNoInv","MinMutNoInv","MaxMutNoInv","sdMutNoInv","FreqMutNoInv",
+                  "InvFit", "NoInvFit","Freq","Chromosome")
+
+# Figure 1A #
+# Inversions between position 1-10Mb are on sex chromosome, Inversions between position 10-20Mb are on Autosome. Modify the "Chromosome" column to indicate this
+Simul[Simul$StartInv>10000000,]$Chromosome="Autosome"
+
+# Create a new column indicating the colums size
+Simul$InvSize=Simul$EndInv - Simul$StartInv 
+
+# For each simulation, determine the maximum frequency the inversion reached, and the maximum generation it segregated (I.e. the generation were it becomes lost of fixed)
+SimulSum=Simul %>% group_by(u,r,h,s,StartInv, InvSize, Chromosome, Rep) %>% summarise(maxGen=max(Gen), Freq=max(Freq))
+
+#Save the resulting table, to avoid regenerating it
+write.table(SimulSum, "~/Paper/ModelSexChrom_V2/Plots/InversionTrajectories_N=1000_Fig3-S13-S15-S19_Summary.txt", quote=F, row.names = F)
+
+# Load this Table
+SimulSum=read.table("~/Paper/ModelSexChrom_V2/Plots/InversionTrajectories_N=1000_Fig3-S13-S15-S19_Summary.txt", header=T)
+# SimulSum=read.table("~/Projects/MutationShelteringV2/Output/OldDataJayEtAl2022/Reanalyses_Jay_etAl2022/InversionTrajectories_N=1000_Fig3-S13-S15-S19_Summary.txt", header=T)
+
+SimulSum$Fixed=0 #Create a new column that indicate if the inversion became fixed. 
+SimulSum[SimulSum$Freq>0.95,]$Fixed=1 # If maximum frequency reached by the inversion is above 0.95, it is considered fixed (For computation purpose, we stopped the simulation when the inversion get fixed, and so we do not observe inversion at frequency 1.0)
+SimulSum[(SimulSum$Chromosome=="Y" & SimulSum$Freq==0.25),]$Fixed=1 # If the inversion is on chromosome Y and reach a frequency of 0.25, it is fixed
+SimulSumSum=SimulSum %>% group_by(u,r,h,s,StartInv, InvSize, Chromosome) %>% summarise(nFixed=sum(Fixed), n=n()) #For each value of u, r, h, s, Inversion size, and inversion position (Y or autosome), count the number of inversion fixed, and of inversion analysed
+SimulSumSum$FracFixed=SimulSumSum$nFixed/SimulSumSum$n #Define the proportion of inversion fixed. 
+Col=scales::viridis_pal(begin=0.1, end=0.8, option="A")(5) #Define the color palette to be used
+
+SimulSumSum$InvSize_f=factor(paste0("Inv. size=", SimulSumSum$InvSize, " bp"),
+                             levels=c("Inv. size=500000 bp", "Inv. size=1000000 bp","Inv. size=2000000 bp","Inv. size=5000000 bp")) #Refactor the inversion size, so it appear in the right order in the plot
+
+for (u in unique(SimulSumSum$u)) #For each value of u (1e-08 or 1e-09), create a plot
+{
+    Base=ggplot(SimulSumSum[(SimulSumSum$u==u & SimulSumSum$s<0),], aes( y=FracFixed))  # Define the plot basics # If you want to plot the simulation corresponding to s=0, just remove the "& SimulSumSum$s<0", and set above : "Col=scales::viridis_pal(begin=0.1, end=0.8, option="A")(6)" (But again, it is not informative, it does not allow to measure the strength of the sheltering effect or of the lower-load advantage, nor allow to measure the effect of different effective population size between autosomes and sex chromosomes on the fixation of loaded inversions) 
+    PlotFracFixed=Base+geom_line(aes(x=h, color=as.factor(s)), size=1)+ #Plot the line
+        geom_point(aes(x=h, color=as.factor(s)), size=5)+
+        scale_color_manual("Selection coefficient \nof mutations (s)", values=Col)+
+        ylab("Fraction of inversions fixed after 10,000 generations")+
+        xlab("Dominance coefficient of mutations (h)")+
+        theme( #Improve plot design
+            panel.grid.major = element_line(color="grey95"),
+            panel.background = element_blank(),
+            text = element_text(size=18),
+            axis.line = element_line(colour = "grey"),
+            axis.title = element_text(size = 20, face="bold"),
+            legend.spacing.y= unit(0, 'cm'),
+            legend.title = element_text(size = 20, face="bold"),
+            legend.text = element_text(size = 18),
+            strip.text.x = element_text(size = 20, face="bold"),
+            strip.text.y = element_text(size = 18, face="bold")
+        )+
+        facet_grid(InvSize_f ~ Chromosome, scales = "free_y")
+    
+    save_plot(paste0("~/Paper/ModelSexChrom_V2/Plots/Figure1A_",u,".pdf"), PlotFracFixed, nrow=4, ncol=2, base_aspect_ratio = 2)
+    save_plot(paste0("~/Paper/ModelSexChrom_V2/Plots/Figure1A_",u,".png"), PlotFracFixed, nrow=4, ncol=2, base_aspect_ratio = 2)
+}
+
+SimulSumSum$hCat="Inferior to 0.25"
+SimulSumSum[SimulSumSum$h>0.25,]$hCat="Superior to 0.25"
+
+SimulSumSumWide_FracFixed=SimulSumSum %>%
+    pivot_wider(id_cols=-c(nFixed, n, StartInv, hCat), values_from = FracFixed, names_from = Chromosome) %>%
+    mutate(RatioYvsAuto=Y/Autosome) #Reshape the dataframe to compare the rate of fixation on sex chromosomes and autosomes. The column "Y" contains de rate of inversion fixation on Y chromosomes, while "Autosome" contains de rate of inversion fixation on autosomes. The Column "RatioYvsAuto" contains the ratio of these value (>1 if the rate is higher on sex chromosomes, <1 otherwise)
+sum(SimulSumSumWide_FracFixed$RatioYvsAuto>1)/nrow(SimulSumSumWide_FracFixed) #Inversion are more likely to fix on Y chromosomes than on Autosomes in 94.9 % of the parameter space.
+sum(SimulSumSumWide_FracFixed$Y)/sum(SimulSumSumWide_FracFixed$Autosome) #Inversion were 5.81 more likely to fix on Y chromosomes than on Autosomes in the parameter space studied.
+sum(SimulSumSumWide_FracFixed[(SimulSumSumWide_FracFixed$h<0.25 & SimulSumSumWide_FracFixed$s>-0.02),]$Y)/sum(SimulSumSumWide_FracFixed[(SimulSumSumWide_FracFixed$h<0.25 & SimulSumSumWide_FracFixed$s>-0.02),]$Autosome) #Inversion were 9.89 more likely to fix on Y chromosomes than on Autosomes in the parameter space with relatively recessive mutations and small s 
+
+
+#Estimate fixation time
+SimulYFix=Simul[(Simul$Chromosome=="Y" & Simul$Freq==0.25),]
+SimulYFixFirstGenFix=SimulYFix %>% group_by(u,r,h,s,StartInv, InvSize, Chromosome, Rep) %>% summarise(FixTime=min(Gen))
+SimulAutoFix=Simul[(Simul$Chromosome=="Autosome" & Simul$Freq>0.95),]
+SimulAutoFixFirstGenFix=SimulAutoFix %>% group_by(u,r,h,s,StartInv, InvSize, Chromosome, Rep) %>% summarise(FixTime=min(Gen))
+Merged=rbind(SimulAutoFixFirstGenFix, SimulYFixFirstGenFix)
+Merged %>% group_by(Chromosome) %>% summarise(MeanFixTime=mean(FixTime)-15000) # Difference in fixation time 
+
+## Figure 1B ##
+library(tidyverse)
+library(cowplot)
+## Load the file containing the simulation results (The same as in Jay et al. (2022), to be downloaded here: dx.doi.org/10.6084/m9.figshare.19961033)
+# Simul=read.table(paste("~/Paper/ModelSexChrom/V3/CleanDataset/Compressed/InversionTrajectories_N=1000_Fig3-S13-S15-S19.txt",sep=""), stringsAsFactors = F) #File containing all simulation with N=1000
+
+#Set the column names
+# # colnames(Simul)=c("N", "u", "r", "h", "s", "Gen", "StartInv", "EndInv", "Rep", 
+#                   "MeanMutInv","MinMutInv","MaxMutInv","sdMutInv","FreqMutInv",
+#                   "MeanMutNoInv","MinMutNoInv","MaxMutNoInv","sdMutNoInv","FreqMutNoInv",
+#                   "InvFit", "NoInvFit","Freq","Chromosome")
+
+# Inversions between position 1-10Mb are on sex chromosome, Inversions between position 10-20Mb are on Autosome. Modify the "Chromosome" column to indicate this
+# Simul[Simul$StartInv>10000000,]$Chromosome="Autosome"
+
+# Create a new column indicating the colums size
+# Simul$InvSize=Simul$EndInv - Simul$StartInv 
+
+#Extract the data for 4 sets of parameters values
+Simul1=Simul[(Simul$u==1e-08 & Simul$h==0.2 & Simul$s==-0.001 & Simul$InvSize==2000000),]
+Simul2=Simul[(Simul$u==1e-08 & Simul$h==0.1 & Simul$s==-0.01 & Simul$InvSize==2000000),]
+Simul3=Simul[(Simul$u==1e-09 & Simul$h==0.01 & Simul$s==-0.1 & Simul$InvSize==2000000),]
+Simul4=Simul[(Simul$u==1e-09 & Simul$h==0.3 & Simul$s==-0.001 & Simul$InvSize==2000000),]
+
+SimulSub=rbind(Simul1, Simul2, Simul3,Simul4)
+
+SimulSub$Code=paste(SimulSub$N,SimulSub$u,SimulSub$r,SimulSub$h,SimulSub$s,SimulSub$InvSize,SimulSub$Position, SimulSub$Rep, sep="_") # Define a code identifying eavh simulation
+summarySub=SimulSub %>% group_by(Code) %>% summarise(maxFreq=max(Freq), maxGen=max(Gen), InitMutNumb=min(MeanMutInv)) # For each simulation, grep its max frequency and it end generation (which can be different from 25000 in case the inversion is lost or fixed)
+FixedSimul=summarySub[summarySub$maxFreq>0.95,]$Code #Grep the code of the inversion that have fixed
+#LostSimul=summarySub[summarySub$maxFreq<0.95,]$Code #Grep the code of the inversion that have not fixed
+# LineToAdd=SimulSub[0,] #For computation reason, we stop record population state after inversion fixation or lost. For plotting purpose, recreate ending states.
+# for (i in LostSimul){ #For each inversion that have not fixed 
+#     LastGen=summarySub[summarySub$Code==i,]$maxGen 
+#     FalseEndGoodSimulSub=SimulSub[(SimulSub$Code==i & SimulSub$Gen==LastGen),] #Grep the last generation this inversion was recorded
+#     FalseEndGoodSimulSub$Gen=24991 #Change it to 24991 (last recorded generation)
+#     FalseEndGoodSimulSub$Freq=0 #Set its frequency to 0
+#     FalseEndGoodSimulSub$MeanMutInv=0 # Set its mutation number to 0
+#     FalseMiddleGoodSimulSub=FalseEndGoodSimulSub #Same thing, but just for 10 generation after the last generation recorded
+#     FalseMiddleGoodSimulSub$Gen=LastGen+10
+#     LineToAdd=rbind(LineToAdd, FalseEndGoodSimulSub, FalseMiddleGoodSimulSub)
+# }
+
+LineToAdd2=SimulSub[0,] #For computation reason, we stop record population state after inversion fixation or lost. For plotting purpose, recreate ending states of fixed inversion.
+
+for (i in FixedSimul){ #Do the same thing for fixed inversions
+    LastGen=summarySub[summarySub$Code==i,]$maxGen
+    FalseEndGoodSimulSub=SimulSub[(SimulSub$Code==i & SimulSub$Gen==LastGen),] #Grep the last generation this inversion was recorded
+    FalseEndGoodSimulSub$Gen=24991  #Change it to 24991 (last recorded generation)
+    FalseEndGoodSimulSub$Freq=1 #Set its frequency to 1
+    FalseEndGoodSimulSub$MeanMutInv=SimulSub[(SimulSub$Code==i & SimulSub$Gen==LastGen),]$MeanMutInv #Consider that its mutation number hadn't changed
+    FalseEndGoodSimulSub$MinMutInv=SimulSub[(SimulSub$Code==i & SimulSub$Gen==LastGen),]$MinMutInv
+    FalseMiddleGoodSimulSub=FalseEndGoodSimulSub  #Same thing, but just for 10 generation after the last generation recorded
+    FalseMiddleGoodSimulSub$Gen=LastGen+10
+    LineToAdd2=rbind(LineToAdd2, FalseEndGoodSimulSub, FalseMiddleGoodSimulSub) 
+}
+
+GoodSimulSubComplete=rbind(SimulSub,LineToAdd2) #Add these false simulation end to the simulation data.frame
+GoodSimulSubComplete[GoodSimulSubComplete$Chromosome=="Y",]$Freq=4*GoodSimulSubComplete[GoodSimulSubComplete$Chromosome=="Y",]$Freq
+Col=scales::viridis_pal(begin=0.0, end=0.6, option="A")(2) #Color Palette
+GoodSimulSubComplete[GoodSimulSubComplete$Chromosome=="Autosome",]$Rep=100000+GoodSimulSubComplete[GoodSimulSubComplete$Chromosome=="Autosome",]$Rep
+GoodSimulSubComplete$Parameter=paste0("s=", GoodSimulSubComplete$s, ", h=", GoodSimulSubComplete$h, ", u=", GoodSimulSubComplete$u)
+options(scipen=0)
+GoodSimulSubComplete$Gen=GoodSimulSubComplete$Gen-15000
+DataAllEnd=GoodSimulSubComplete %>% group_by(u, h, s, Rep, Chromosome) %>% summarise(MaxGen=max(Gen), MaxFreq=max(Freq))#Grep the end generation of each simulation
+DataAllEnd$state="Lost"
+DataAllEnd[(DataAllEnd$MaxGen==9991 & DataAllEnd$MaxFreq==1),]$state="Fixed"
+DataAllEnd[(DataAllEnd$MaxGen==9991 & DataAllEnd$MaxFreq<1),]$state="Segregating"
+SumEnd=DataAllEnd %>% group_by(u, h, s, Chromosome) %>% count(state, sort = TRUE)  #Summarize the data for plotting summary number
+SumEnd=SumEnd[SumEnd$state!="Lost",]
+SumEnd$Pos=0.10
+SumEnd[(SumEnd$state=="Fixed" & SumEnd$Chromosome=="Y"),]$Pos=1.0 #Define position for plotting the text
+SumEnd[(SumEnd$state=="Fixed" & SumEnd$Chromosome=="Autosome"),]$Pos=0.9
+SumEnd$Parameter=paste0("s=", SumEnd$s, ", h=", SumEnd$h, ", u=", SumEnd$u)
+
+#Plot the data 
+base=ggplot(GoodSimulSubComplete) 
+### Inversion frequency
+PlotA=base+geom_line(aes(x=Gen, y=Freq, group=Rep, color=as.factor(Chromosome)), size=0.2, alpha=0.3)+ #Inversion frequency
+    geom_hline(yintercept = 0, linetype=1, size=0.2)+
+    geom_text(data=SumEnd, aes(x=8500, y=Pos, label=paste0("n=",n), color=as.factor(Chromosome)), 
+              vjust = -0.5, hjust = 0, size=4, show.legend = FALSE)+
+    scale_color_manual("", values=Col, label=c("Autosomal","Y-linked"))+
+    xlab("Generation")+ylab("Inversion frequency")+
+    themeSimple+
+    theme(
+        legend.background = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "grey"),
+        axis.title = element_text(face="bold"),
+        plot.title=element_text(size=12, face="bold",hjust=0.5, vjust=2),
+        strip.placement = "outside",
+        legend.key=element_blank(),
+        panel.spacing = unit(1, "lines"),
+        strip.text = element_text(face="bold"))+
+    #guides(color = guide_legend(override.aes = list(size = 1)))+
+    scale_y_continuous(breaks = c(0.0,0.25,0.5,0.75,1.0), limits=c(-0.05,1.1))+
+    facet_grid( ~ Parameter)
+PlotA
+
+#Mutation number
+PlotB=base+geom_line(data=GoodSimulSubComplete[GoodSimulSubComplete$MeanMutInv>0,], aes(x=Gen, y=MeanMutInv, group=Rep, color=as.factor(Chromosome)), size=0.2, alpha=0.3)+ #Mutation number 
+    geom_hline(yintercept = 0, linetype=1, size=0.2)+
+    scale_color_manual("", values=Col, label=c("Autosomal","Y-linked"))+
+    xlab("Generation")+ylab("Number of mutations\nin inversions")+
+    themeSimple+
+    theme(
+        legend.background = element_blank(),
+        panel.border = element_blank(),  
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        legend.key=element_blank(),
+        axis.title = element_text(face="bold"),
+        panel.spacing = unit(1, "lines"),
+        plot.title=element_text(size=12, face="bold",hjust=0.5, vjust=2),
+        axis.line = element_line(colour = "grey"),
+        strip.placement = "outside",
+        strip.background = element_blank(),
+        strip.text = element_blank())+
+    guides(color = guide_legend(override.aes = list(size = 2)))+
+    facet_wrap(. ~ Parameter, ncol = 4, scales="free_y")
+PlotB
+
+MergedPlot=plot_grid(PlotA, PlotB, nrow = 2, labels = c('a', 'b')) #Merge the plot to create the figure 3.
+save_plot(paste0("~/Paper/ModelSexChrom_V2/Plots/Figure1B.svg"),MergedPlot, nrow=2, ncol=4, base_aspect_ratio = 1) #Fig. S?
+
+### Initial number of mutations (figure insets)
+DataAllEnd=GoodSimulSubComplete %>% group_by(u, h, s, Rep, Chromosome) %>% summarise(MaxGen=max(Gen), MaxFreq=max(Freq), InitMutInv=MinMutInv[Gen==1],  InitMutNoInv=MeanMutNoInv[Gen==1])#Grep the end generation of each simulation
+DataAllEnd$state="Lost"
+DataAllEnd[(DataAllEnd$MaxGen==9991 & DataAllEnd$MaxFreq==1),]$state="Fixed"
+DataAllEnd[(DataAllEnd$MaxGen==9991 & DataAllEnd$MaxFreq<1),]$state="Segregating"
+DataAllEnd$Parameter=paste0("s=", DataAllEnd$s, ", h=", DataAllEnd$h, ", u=", DataAllEnd$u)
+PlotQuantMut=ggplot(DataAllEnd[DataAllEnd$state!="Segregating",], aes(x=state, y=InitMutInv, fill=state)) + geom_boxplot(, outlier.shape = NA)+
+    facet_wrap(. ~ Parameter, ncol = 4, scales="free")+
+    scale_fill_manual(values=Col2, guide=F)+
+    themeSimple+
+    ylab("Initial no. of mutation in inversions")+
+    stat_summary(fun.y="mean", size=1.5, shape=21)+
+    theme(axis.text = element_text(size=20), axis.text.x=element_text(face="bold"))
+PlotQuantMut
+save_plot(paste0("~/Paper/ModelSexChrom_V2/Plots/Figure1B_insets.svg"),PlotQuantMut, nrow=1, ncol=4, base_aspect_ratio = 1) #Fig. S?
+
+
+
+
+
